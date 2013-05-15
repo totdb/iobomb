@@ -1,10 +1,9 @@
-/* gcc iobomb.c -o libiobomb.so -shared -fPIC -lpthread */
+/* gcc iobomb.c -o libiobomb.so -shared -fPIC -ldl */
 
 #include <assert.h>
 #include <dlfcn.h>
 #include <errno.h>
 #include <fcntl.h>
-#include <pthread.h>
 #include <unistd.h>
 
 
