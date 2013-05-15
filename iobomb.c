@@ -8,14 +8,11 @@
 #include <unistd.h>
 
 
-#define IOBOMB_INIT pthread_once(&init_once, iobomb_init)
-
-
-static pthread_once_t init_once = PTHREAD_ONCE_INIT;
 static ssize_t (*iobomb_read) (int fildes, void *buf, size_t nbyte);
 static ssize_t (*iobomb_write) (int fildes, const void *buf, size_t nbyte);
 
 
+__attribute__((constructor))
 static void
 iobomb_init (void)
 {
@@ -26,6 +23,9 @@ iobomb_init (void)
 #else
    lib = dlopen("/lib64/libc.so.6", RTLD_LAZY);
 #endif
+   if (!lib) {
+      lib = dlopen("libc.so.6", RTLD_LAZY);
+   }
    assert(lib);
 
    iobomb_read = dlsym(lib, "read");
@@ -42,8 +42,6 @@ read (int fildes,
       size_t nbyte)
 {
    static unsigned i;
-
-   IOBOMB_INIT;
 
    switch (__sync_fetch_and_add(&i, 1) % 4) {
    case 0:
@@ -68,8 +66,6 @@ write (int fildes,
        size_t nbyte)
 {
    static unsigned i;
-
-   IOBOMB_INIT;
 
    switch (__sync_fetch_and_add(&i, 1) % 4) {
    case 0:
